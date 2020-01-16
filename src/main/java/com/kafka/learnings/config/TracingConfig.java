@@ -1,0 +1,53 @@
+package com.kafka.learnings.config;
+
+import io.jaegertracing.internal.samplers.ConstSampler;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.PostConstruct;
+
+@Configuration
+public class TracingConfig {
+
+    @Value("${jaeger.tracer.host}")
+    private String jaegerHost;
+    @Value("${jaeger.tracer.port}")
+    private Integer jaegerPort;
+    @Value("${spring.application.name}")
+    private String applicationName;
+    private static final String TRACING_COMPONENT_NAME = "java-kafka";
+    private static final String TRACING_SERVICE_NAME = "kafka";
+    private static final String TRACING_NUMBER_VALUE = "number.value";
+
+    @Bean
+    public Tracer tracer() {
+        return io.jaegertracing.Configuration.fromEnv(applicationName)
+                .withSampler(
+                        io.jaegertracing.Configuration.SamplerConfiguration.fromEnv()
+                                .withType(ConstSampler.TYPE)
+                                .withParam(1))
+                .withReporter(
+                        io.jaegertracing.Configuration.ReporterConfiguration.fromEnv()
+                                .withLogSpans(true)
+                                .withFlushInterval(1000)
+                                .withMaxQueueSize(10000)
+                                .withSender(
+                                        io.jaegertracing.Configuration.SenderConfiguration.fromEnv()
+                                                .withAgentHost(jaegerHost)
+                                                .withAgentPort(jaegerPort)
+                                ))
+                .getTracer();
+    }
+
+    @PostConstruct
+    public void registerToGlobalTracer() {
+        if (!GlobalTracer.isRegistered()) {
+            GlobalTracer.register(tracer());
+        }
+    }
+
+}
+

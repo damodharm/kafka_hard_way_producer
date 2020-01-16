@@ -1,0 +1,15 @@
+spring:
+  application.name: producerDemo
+
+kafka:
+  bootstrap-servers: localhost:9092
+  consumer:
+    group-id: input-topic-group
+    offset-config: earliest
+
+jaeger.tracer:
+  host: localhost
+  port: 6831
+
+topics:
+  topic-name: input-topic
