@@ -18,9 +18,6 @@ public class TracingConfig {
     private Integer jaegerPort;
     @Value("${spring.application.name}")
     private String applicationName;
-    private static final String TRACING_COMPONENT_NAME = "java-kafka";
-    private static final String TRACING_SERVICE_NAME = "kafka";
-    private static final String TRACING_NUMBER_VALUE = "number.value";
 
     @Bean
     public Tracer tracer() {
